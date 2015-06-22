@@ -47,6 +47,5 @@
         "ls" (safe/ls! command-args options)
         "cat" (safe/cat! command-args options)
         "update" (safe/update! command-args options)
-        "store" (safe/store! command-args options)
         (utils/print-exit! 1 "Invalid command"))
       (shutdown-agents))))

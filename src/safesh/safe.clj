@@ -4,7 +4,6 @@
             [safesh.ls :as ls]
             [safesh.cat :as cat]
             [safesh.update :as update]
-            [safesh.store :as store]
             [safesh.utils :as utils])
   (:gen-class))
 
@@ -63,7 +62,7 @@
       (not (fs/file? permissions-path)) (utils/print-exit! 1 "Must have a permissions file.")
       (not (fs/directory? keys-path)) (utils/print-exit! 1 "Must have a keys directory.")
       (not (fs/directory? secrets-path)) (utils/print-exit! 1 "Must have a secrets directory.")
-      (fs/directory? config-path) (utils/print-exit! 1 "Config file cannot be a directory."))
+      (fs/directory? config-path) (utils/print-exit! 1 "Config file can't be a directory."))
 
     (when (-> config-path fs/file? not) (create-config! (fs/file keys-path) config-path))))
 
@@ -130,4 +129,3 @@
 (defn ls! [args options] (run-command! args options ls/execute!))
 (defn cat! [args options] (run-command! args options cat/execute!))
 (defn update! [args options] (run-command! args options update/execute!))
-(defn store! [args options] (run-command! args options store/execute!))
