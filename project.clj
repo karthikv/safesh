@@ -1,8 +1,8 @@
-(defproject safesh "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+(defproject safesh "0.1.0"
+  :description "Store and manage encrypted secrets using SSH keys."
+  :url "https://github.com/karthikv/safesh"
+  :license {:name "MIT"
+            :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.cli "0.3.1"]
                  [me.raynes/fs "1.4.6"]
