@@ -16,10 +16,10 @@
    ["-h" "--help" "Print help information."]])
 
 (defn usage [summary & {message :message}]
-  (let [lines ["safesh store stores a new secret and releases it to those with permissions."
-               "Usage: safesh store OPTIONS NAME"
+  (let [lines ["safesh update updates and releases a secret to those with permissions."
+               "Usage: safesh update OPTIONS NAME"
                ""
-               "NAME: the name of the secret to store"
+               "NAME: the name of the secret to update/release"
                ""
                "OPTIONS:"
                summary]]

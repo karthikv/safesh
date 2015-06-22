@@ -11,4 +11,5 @@
                  [org.bouncycastle/bcprov-jdk15 "1.46"]]
   :plugins [[lein-bin "0.3.4"]]
   :bin {:name "safesh"}
-  :main safesh.core)
+  :main safesh.core
+  :aot [safesh.core])

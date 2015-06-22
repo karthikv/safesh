@@ -21,10 +21,9 @@
                "Usage: safesh OPTIONS COMMAND"
                ""
                "COMMANDS:"
-               (str "update -- Releases/Revokes secrets based on the"
-                 " given configuration file.")
-               (str "store NAME -- Stores a new value for the secret"
-                 " named NAME.")
+               (str "ls - lists secrets that can be decrypted")
+               (str "cat - decrypts and outputs a secret to stdout")
+               (str "update - updates and releases a secret to those with permissions") 
                ""
                "OPTIONS:"
                summary]]
