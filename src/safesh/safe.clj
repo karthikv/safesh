@@ -102,9 +102,9 @@
       (->> config :private-key-path fs/file? not)
         [true "Config file private-key-path is not a valid file."]
       (and (-> groups nil? not)
-           (-> groups type (= clojure.lang.PersistentArrayMap) not))
+           (->> groups (instance? clojure.lang.APersistentMap) not))
         [true "Groups must be a map from name -> array of keys."]
-      (-> secrets type (= clojure.lang.PersistentArrayMap) not)
+      (->> secrets (instance? clojure.lang.APersistentMap) not)
         [true "Secrets must be a map from name -> array of keys/groups."]
       :else
         (let [group-error (->> groups

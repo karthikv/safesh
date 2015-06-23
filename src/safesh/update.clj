@@ -83,7 +83,7 @@
             (cond
               (fs/directory? secret-path)
                 (utils/print-exit! 1 (str secret-path " can't be a directory."))
-              (-> secret-path fs/file? not)
+              (and (-> secret-path fs/file? not) (options :release-only))
                 (utils/print-exit! 1 (str secret-path " must exist.")))
 
             (let [text (if (options :release-only)
