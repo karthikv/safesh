@@ -52,4 +52,5 @@
             (when (-> secret-path fs/file? not)
               (utils/print-exit! 1 "Secret doesn't exist on filesystem."))
             (let [secret (read-secret secret-path private-key-path)]
-              (print secret)))))))
+              (print secret)
+              (flush)))))))
