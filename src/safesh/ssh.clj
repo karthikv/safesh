@@ -1,28 +1,25 @@
 (ns safesh.ssh
   (:require [safesh.utils :as utils]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [clojure.java.shell :as shell])
   (:import javax.crypto.Cipher
            java.security.Security
            java.security.KeyFactory
            java.security.PublicKey
            java.security.spec.DSAPublicKeySpec
            java.security.spec.RSAPublicKeySpec
+           java.security.spec.PKCS8EncodedKeySpec
            java.math.BigInteger
-           java.util.Scanner
-           org.bouncycastle.jce.provider.BouncyCastleProvider
-           org.bouncycastle.openssl.PasswordFinder
-           org.bouncycastle.openssl.EncryptionException)
+           java.util.Scanner)
   (:gen-class))
 
-(Security/addProvider (BouncyCastleProvider.))
-
 (defn encrypt [text public-key]
-  (let [cipher (doto (Cipher/getInstance "RSA/ECB/PKCS1Padding" "BC")
+  (let [cipher (doto (Cipher/getInstance "RSA/ECB/PKCS1Padding")
                  (.init Cipher/ENCRYPT_MODE public-key))]
     (utils/base64 (.doFinal cipher (utils/get-bytes text)))))
 
 (defn decrypt [text private-key]
-  (let [cipher (doto (Cipher/getInstance "RSA/ECB/PKCS1Padding" "BC")
+  (let [cipher (doto (Cipher/getInstance "RSA/ECB/PKCS1Padding")
                  (.init Cipher/DECRYPT_MODE private-key))]
     (String. (.doFinal cipher (utils/debase64 text)))))
 
@@ -61,15 +58,10 @@
                       {:reason ::unknown-key-type
                        :type type})))))
 
-(deftype PasswordFn [password-fn]
-  PasswordFinder
-  (getPassword [_]
-    (.toCharArray (password-fn))))
-
-(defn ask-password! []
+(defn ask-password! [path]
   (let [should-run (atom true)
         erase-thread (future
-                       (print "SSH key password: ")
+                       (print (str "Enter pass phrase for " path ": "))
                        (flush)
                        (loop []
                          (Thread/sleep 10)
@@ -84,11 +76,15 @@
         password))))
 
 (defn read-private-key! [path]
-  (if-let [private-key (try (-> path
-                                java.io.FileReader.
-                                (org.bouncycastle.openssl.PEMReader.
-                                  (PasswordFn. ask-password!))
-                                .readObject)
-                            (catch EncryptionException e nil))]
-    (.getPrivate private-key)
-    (recur path)))
+  (let [password (ask-password! path)
+        {:keys [exit out]} (shell/sh "openssl" "pkcs8" "-topk8" "-in" path "-nocrypt"
+                                     "-passin" (str "pass:" password))]
+    (if (= exit 0)
+      (do
+        (let [key-bytes (utils/debase64 (string/join "\n" (-> out
+                                                              (string/split #"\n")
+                                                              rest
+                                                              drop-last)))]
+          (-> (KeyFactory/getInstance "RSA")
+              (.generatePrivate (PKCS8EncodedKeySpec. key-bytes)))))
+      (recur path))))
