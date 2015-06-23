@@ -64,11 +64,12 @@ within the subdirectory for a key are the documents that are encrypted using
 that key. The owner of a private key can read documents within the directory
 that corresponds to his/her public key.
 
-The secrets directory, keys directory, config.yml, and permissions.yml should
-all be version controlled. Whenever a secret is stored, updated, released, or
-revoked, a commit should be made to the version control system. This way,
-there's a history of all secrets, and any team member can simply update the
-directory from version control to get new secrets.
+The secrets directory, keys directory, and permissions.yml should all be
+version controlled. config.yml is user-specific and should be left out of
+a repository. Whenever a secret is stored, updated, released, or revoked,
+a commit should be made to the version control system. This way, there's
+a history of all secrets, and any team member can simply update the directory
+from version control to get new secrets.
 
 
 ## Store/Update a secret
