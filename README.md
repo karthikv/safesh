@@ -46,13 +46,29 @@ of key names in the keys/ directory.
 
 secrets are the actual secrets that you can create/read/update/delete. secrets
 are represented as a hash where the key is a secret name and the value is an
-array of members that can read the secret. members are either groups or key
-names in the keys/ directory.
+array of members that can read the secret. members are either group names or
+key names in the keys/ directory.
 
 By default, `safesh` assumes the configuration file is ./config.yml, the
 permissions file is ./permissions.yml, and the keys directory is ./keys. You
 can configure these by passing the -c, -p, and -k options, respectively, to
 `safesh`.
+
+
+## Secret storage
+Secrets are stored within a secret directory, which, by default, is the current
+working directory. You can modify this by passing the -s option to `safesh`.
+
+Within the secrets directory is a subdirectory for each public key. Contained
+within the subdirectory for a key are the documents that are encrypted using
+that key. The owner of a private key can read documents within the directory
+that corresponds to his/her public key.
+
+The secrets directory, keys directory, config.yml, and permissions.yml should
+all be version controlled. Whenever a secret is stored, updated, released, or
+revoked, a commit should be made to the version control system. This way,
+there's a history of all secrets, and any team member can simply update the
+directory from version control to get new secrets.
 
 
 ## Store/Update a secret
@@ -73,9 +89,9 @@ into your permissions.yml file. Then, run the following command:
 $ safesh update [name]
 ```
 
-Given no options, this will prompt you to enter new plain text for the secret
-named `[name]`. It will then encrypt and release this secret to all those who
-have permissions to access it.
+This will prompt you to enter new plain text for the secret named `[name]`. It
+will then encrypt and release this secret to all those who have permissions to
+access it.
 
 
 ## Read a secret
@@ -117,8 +133,8 @@ secrets:
 Then, run the following command:
 
 ```sh
-$ safesh update -r
+$ safesh update -r foo
 ```
 
-The `-r` option tells the `update` command to only release/revoke the secret,
+The `-r` option tells the `update` command to only release/revoke `foo`,
 and not change its contents.
