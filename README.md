@@ -3,8 +3,9 @@
 
 ## Installation
 Download the `safesh` binary from the
-[latest release](https://github.com/karthikv/safesh/releases/tag/v0.1.0) and,
-optionally, put it in a directory in your `PATH`.
+[latest release](https://github.com/karthikv/safesh/releases/tag/v0.1.0). Run
+`chmod +x safesh` to make it executable. Optionally, put it in a directory in
+your `PATH`.
 
 ## Configuration
 When you run `safesh` for the first time, it'll ask you setup questions and
