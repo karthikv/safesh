@@ -22,9 +22,12 @@
     (string/join "\n"
       (if (nil? message) lines (concat [message ""] lines)))))
 
+(def private-key nil)
 (defn read-secret [secret-path private-key-path]
+  (if (not private-key)
+    (def private-key (ssh/read-private-key! private-key-path)))
+
   (let [secret (yaml/parse-string (slurp secret-path))
-        private-key (ssh/read-private-key! private-key-path)
         aes-key (ssh/decrypt (secret :key) private-key)]
     (aes/decrypt (secret :ciphertext) aes-key)))
 
