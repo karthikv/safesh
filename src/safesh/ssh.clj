@@ -61,13 +61,13 @@
 (defn ask-password! [path]
   (let [should-run (atom true)
         erase-thread (future
-                       (print (str "Enter pass phrase for " path ": "))
-                       (flush)
+                       (.print *err* (str "Enter pass phrase for " path ": "))
+                       (.flush *err*)
                        (loop []
                          (Thread/sleep 10)
                          (when @should-run
-                           (print "\010 ")
-                           (flush)
+                           (.print *err* "\010 ")
+                           (.flush *err*)
                            (recur))))]
     (let [password (read-line)]
       (swap! should-run not)

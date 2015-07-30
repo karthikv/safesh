@@ -38,7 +38,7 @@
       (:help options) (utils/print-exit! 0 (usage summary))
       (not= (count arguments) 1)
         (utils/print-exit! 1 (usage summary :message
-                                    "Need exactly one argument: secret name."))
+                                    "Need exactly one argument: secret name"))
       errors (utils/print-exit! 1 (usage summary :message
                                          (str (string/join "\n" errors)))))
 

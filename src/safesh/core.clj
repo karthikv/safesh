@@ -47,7 +47,6 @@
       (let [options (safe/set-up! options)
             command (first arguments)
             command-args (rest arguments)]
-        (println "got here")
         (case command
           "ls" (safe/ls! command-args options)
           "cat" (safe/cat! command-args options)

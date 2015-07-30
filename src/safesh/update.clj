@@ -86,7 +86,7 @@
                        (cat/read-secret secret-path private-key-path)
                        (do
                          (println (str "Enter text for secret " secret-name ":"))
-                         (println "Enter $$$ on a separate line to indicate EOF")
+                         (println "Enter $$$ on a separate line to indicate EOF.")
                          (read-input! "")))]
             (when (= 0 (count text)) (utils/print-exit! 1 "Must provide secret text."))
             (write-secret! {:keys-path keys-path

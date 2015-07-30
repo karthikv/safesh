@@ -8,11 +8,8 @@
             [safesh.utils :as utils])
   (:gen-class))
 
-(defn expand-path [path]
-  (-> path fs/expand-home fs/file str))
-
-(def DEFAULT-PRIVATE-KEY-PATH (expand-path "~/.ssh/id_rsa"))
-(def GLOBAL-CONFIG-PATH (expand-path "~/.safesh"))
+(def DEFAULT-PRIVATE-KEY-PATH (utils/expand-path "~/.ssh/id_rsa"))
+(def GLOBAL-CONFIG-PATH (utils/expand-path "~/.safesh"))
 
 (defn list-keys [keys-dir]
   (->> keys-dir .list vec))
@@ -41,7 +38,7 @@
       (if (nil? path-raw) nil
         (let [path (->
                      (if (= 0 (count path-raw)) DEFAULT-PRIVATE-KEY-PATH path-raw)
-                     expand-path)]
+                     utils/expand-path)]
           (if (fs/file? path) (-> path fs/absolute str) (recur)))))))
 
 (defn create-config! [keys-dir config-path]
@@ -63,46 +60,43 @@
   (-> GLOBAL-CONFIG-PATH slurp yaml/parse-string))
 
 (defn extract-paths [options]
-  {:config-path (-> options :config-path expand-path)
-   :permissions-path (-> options :permissions-path expand-path)
-   :keys-path (-> options :keys-path expand-path)
-   :secrets-path (-> options :secrets-path expand-path)})
+  {:config-path (-> options :config-path utils/expand-path)
+   :permissions-path (-> options :permissions-path utils/expand-path)
+   :keys-path (-> options :keys-path utils/expand-path)
+   :secrets-path (-> options :secrets-path utils/expand-path)})
 
 (defn validate-setup-paths! [options]
-  (let [{:keys [config-path permissions-path keys-path secrets-path]} (extract-paths options)
+  (let [{:keys [config-path permissions-path keys-path secrets-path]} options
         error (cond
                 (not (fs/file? permissions-path)) "Must have a permissions file."
                 (not (fs/directory? keys-path)) "Must have a keys directory."
                 (not (fs/directory? secrets-path)) "Must have a secrets directory."
                 (fs/directory? config-path) "Config file can't be a directory."
                 :else nil)]
-    (println "in valid setup 1" permissions-path)
     (if error (utils/print-exit! 1 error))
-
-    (println "in valid setup 2")
     (when (-> config-path fs/file? not)
       (create-config! (fs/file keys-path) config-path))
-    (println "in valid setup 3")
     (record-last-valid-options options)
-    (println "end valid setup")
     options))
 
 (defn set-up! [options]
-  (println "begin setup")
-  (if (and (-> options :config-path expand-path fs/file? not)
-           (fs/file? GLOBAL-CONFIG-PATH))
-    (let [last-valid-options (read-last-valid-options)
-          directory (last-valid-options :directory)
-          old-cwd fs/*cwd*]
-      (fs/chdir directory)
-      (if (-> last-valid-options :config-path expand-path fs/file? not)
-        (do
-          (fs/chdir old-cwd)
-          (validate-setup-paths! options))
-        (do
-          (println "No config file found; using last valid options")
-          (validate-setup-paths! last-valid-options))))
-    (validate-setup-paths! options)))
+  (let [options (extract-paths options)]
+    (if (and (-> options :config-path fs/file? not)
+             (fs/file? GLOBAL-CONFIG-PATH))
+      (let [last-valid-options (read-last-valid-options)
+            directory (last-valid-options :directory)
+            old-cwd fs/*cwd*]
+        (fs/chdir directory)
+        (if (-> last-valid-options :config-path utils/expand-path fs/file? not)
+          (do
+            (fs/chdir old-cwd)
+            (validate-setup-paths! options))
+          (do
+            (.println *err* "No config file found; using last valid directory/options.")
+            (let [new-options (-> last-valid-options extract-paths validate-setup-paths!)]
+              (fs/chdir old-cwd)
+              new-options))))
+      (validate-setup-paths! options))))
 
 (defn validate-group [keys-path group-name group-key-names]
   (let [invalid-key-name (->> group-key-names
@@ -127,7 +121,7 @@
                          flatten)])))
 
 (defn validate-options [options]
-  (let [{:keys [permissions-path keys-path config-path secrets-path]} (extract-paths options)
+  (let [{:keys [permissions-path keys-path config-path secrets-path]} options
         permissions (-> permissions-path slurp yaml/parse-string)
         groups (:groups permissions)
         secrets (:secrets permissions)
