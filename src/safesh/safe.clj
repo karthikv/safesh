@@ -4,10 +4,15 @@
             [safesh.ls :as ls]
             [safesh.cat :as cat]
             [safesh.update :as update]
+            [safesh.fetch :as fetch]
             [safesh.utils :as utils])
   (:gen-class))
 
-(def DEFAULT-PRIVATE-KEY-PATH "~/.ssh/id_rsa")
+(defn expand-path [path]
+  (-> path fs/expand-home fs/file str))
+
+(def DEFAULT-PRIVATE-KEY-PATH (expand-path "~/.ssh/id_rsa"))
+(def GLOBAL-CONFIG-PATH (expand-path "~/.safesh"))
 
 (defn list-keys [keys-dir]
   (->> keys-dir .list vec))
@@ -36,12 +41,11 @@
       (if (nil? path-raw) nil
         (let [path (->
                      (if (= 0 (count path-raw)) DEFAULT-PRIVATE-KEY-PATH path-raw)
-                     fs/expand-home
-                     str)]
+                     expand-path)]
           (if (fs/file? path) (-> path fs/absolute str) (recur)))))))
 
 (defn create-config! [keys-dir config-path]
-  (println "Config file not found; creating one...")
+  (println "Creating config file...")
   (if-let [key-name (ask-key-name! keys-dir)]
     (if-let [private-key-path (ask-private-key-path!)]
       (->>
@@ -50,21 +54,55 @@
       (utils/print-exit! 1 "\nMust provide a private key path."))
     (utils/print-exit! 1 "\nMust provide a key name.")))
 
+(defn record-last-valid-options [options]
+  (->>
+    (yaml/generate-string (merge {:directory (str fs/*cwd*)} options))
+    (spit GLOBAL-CONFIG-PATH)))
+
+(defn read-last-valid-options []
+  (-> GLOBAL-CONFIG-PATH slurp yaml/parse-string))
+
 (defn extract-paths [options]
-  {:config-path (-> options :config-path fs/expand-home str)
-   :permissions-path (-> options :permissions-path fs/expand-home str)
-   :keys-path (-> options :keys-path fs/expand-home str)
-   :secrets-path (-> options :secrets-path fs/expand-home str)})
+  {:config-path (-> options :config-path expand-path)
+   :permissions-path (-> options :permissions-path expand-path)
+   :keys-path (-> options :keys-path expand-path)
+   :secrets-path (-> options :secrets-path expand-path)})
+
+(defn validate-setup-paths! [options]
+  (let [{:keys [config-path permissions-path keys-path secrets-path]} (extract-paths options)
+        error (cond
+                (not (fs/file? permissions-path)) "Must have a permissions file."
+                (not (fs/directory? keys-path)) "Must have a keys directory."
+                (not (fs/directory? secrets-path)) "Must have a secrets directory."
+                (fs/directory? config-path) "Config file can't be a directory."
+                :else nil)]
+    (println "in valid setup 1" permissions-path)
+    (if error (utils/print-exit! 1 error))
+
+    (println "in valid setup 2")
+    (when (-> config-path fs/file? not)
+      (create-config! (fs/file keys-path) config-path))
+    (println "in valid setup 3")
+    (record-last-valid-options options)
+    (println "end valid setup")
+    options))
 
 (defn set-up! [options]
-  (let [{:keys [config-path permissions-path keys-path secrets-path]} (extract-paths options)]
-    (cond
-      (not (fs/file? permissions-path)) (utils/print-exit! 1 "Must have a permissions file.")
-      (not (fs/directory? keys-path)) (utils/print-exit! 1 "Must have a keys directory.")
-      (not (fs/directory? secrets-path)) (utils/print-exit! 1 "Must have a secrets directory.")
-      (fs/directory? config-path) (utils/print-exit! 1 "Config file can't be a directory."))
-
-    (when (-> config-path fs/file? not) (create-config! (fs/file keys-path) config-path))))
+  (println "begin setup")
+  (if (and (-> options :config-path expand-path fs/file? not)
+           (fs/file? GLOBAL-CONFIG-PATH))
+    (let [last-valid-options (read-last-valid-options)
+          directory (last-valid-options :directory)
+          old-cwd fs/*cwd*]
+      (fs/chdir directory)
+      (if (-> last-valid-options :config-path expand-path fs/file? not)
+        (do
+          (fs/chdir old-cwd)
+          (validate-setup-paths! options))
+        (do
+          (println "No config file found; using last valid options")
+          (validate-setup-paths! last-valid-options))))
+    (validate-setup-paths! options)))
 
 (defn validate-group [keys-path group-name group-key-names]
   (let [invalid-key-name (->> group-key-names
@@ -90,10 +128,10 @@
 
 (defn validate-options [options]
   (let [{:keys [permissions-path keys-path config-path secrets-path]} (extract-paths options)
-        permissions (yaml/parse-string (slurp permissions-path))
+        permissions (-> permissions-path slurp yaml/parse-string)
         groups (:groups permissions)
         secrets (:secrets permissions)
-        config (yaml/parse-string (slurp config-path))]
+        config (-> config-path slurp yaml/parse-string)]
     (cond
       (-> config :key-name nil?) [true "Config file missing key-name."]
       (-> config :private-key-path nil?) [true "Config file missing private-key-path."]
@@ -129,3 +167,4 @@
 (defn ls! [args options] (run-command! args options ls/execute!))
 (defn cat! [args options] (run-command! args options cat/execute!))
 (defn update! [args options] (run-command! args options update/execute!))
+(defn fetch! [args options] (run-command! args options fetch/execute!))

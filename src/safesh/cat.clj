@@ -27,7 +27,7 @@
   (if (not private-key)
     (def private-key (ssh/read-private-key! private-key-path)))
 
-  (let [secret (yaml/parse-string (slurp secret-path))
+  (let [secret (-> secret-path slurp yaml/parse-string)
         aes-key (ssh/decrypt (secret :key) private-key)]
     (aes/decrypt (secret :ciphertext) aes-key)))
 

@@ -1,5 +1,6 @@
 (ns safesh.core
-  (:require [clojure.tools.cli :as cli]
+  (:require [me.raynes.fs :as fs]
+            [clojure.tools.cli :as cli]
             [clojure.string :as string]
             [safesh.safe :as safe]
             [safesh.utils :as utils])
@@ -16,6 +17,7 @@
     :default "."]
    ["-h" "--help" "Print help information."]])
 
+
 (defn usage [summary & {message :message}]
   (let [lines ["safesh stores secrets encrypted using SSH keys."
                "Usage: safesh OPTIONS COMMAND"
@@ -24,6 +26,7 @@
                (str "ls - lists secrets that can be decrypted")
                (str "cat - decrypts and outputs a secret to stdout")
                (str "update - updates and releases a secret to those with permissions") 
+               (str "fetch - fetches secrets to local filesystem")
                ""
                "OPTIONS:"
                summary]]
@@ -39,12 +42,16 @@
                                                          "Missing command"))
       errors (utils/print-exit! 1 (usage summary :message
                                          (str (string/join "\n" errors)))))
-    (safe/set-up! options)
-    (let [command (first arguments)
-          command-args (rest arguments)]
-      (case command
-        "ls" (safe/ls! command-args options)
-        "cat" (safe/cat! command-args options)
-        "update" (safe/update! command-args options)
-        (utils/print-exit! 1 "Invalid command"))
-      (shutdown-agents))))
+
+    (fs/with-mutable-cwd
+      (let [options (safe/set-up! options)
+            command (first arguments)
+            command-args (rest arguments)]
+        (println "got here")
+        (case command
+          "ls" (safe/ls! command-args options)
+          "cat" (safe/cat! command-args options)
+          "update" (safe/update! command-args options)
+          "fetch" (safe/fetch! command-args options)
+          (utils/print-exit! 1 "Invalid command"))
+        (shutdown-agents)))))
