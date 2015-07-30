@@ -20,6 +20,7 @@
 
 (defn usage [summary & {message :message}]
   (let [lines ["safesh update updates and releases a secret to those with permissions."
+               ""
                "Usage: safesh update OPTIONS NAME [NAME [NAME [...]]]"
                ""
                "NAME: the name of the secret to update/release (can specify many);"

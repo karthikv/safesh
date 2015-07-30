@@ -7,7 +7,8 @@
             [safesh.cat :as cat])
   (:gen-class))
 
-(def CLI-OPTIONS [])
+(def CLI-OPTIONS
+  [["-h" "--help" "Print help information."]])
 
 (defn usage [summary & {message :message}]
   (let [lines ["safesh fetch fetches secrets to the local filesystem. fetch reads "
@@ -15,6 +16,7 @@
                "names in safesh, and the values correspond to paths on the local "
                "filesystem. safesh fetches the secrets by name and puts them at "
                "their corresponding paths."
+               ""
                "Usage: safesh fetch [PATH]"
                ""
                "PATH: (optional) path to the YAML file"

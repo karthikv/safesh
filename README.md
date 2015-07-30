@@ -55,15 +55,21 @@ permissions file is ./permissions.yml, and the keys directory is ./keys. You
 can configure these by passing the -c, -p, and -k options, respectively, to
 `safesh`.
 
+Each time you run `safesh` successfully, it records the config file,
+permissions file, and keys directory you specified. If you run `safesh` again
+later, and you don't point it at a valid config file (i.e. -c is not specified
+and your directory doesn't contain config.yml, or -c is specified and it's an
+invalid path), then it'll use the saved paths. Hence, you don't need to cd into
+your secrets directory each time you use `safesh`.
 
 ## Secret storage
 Secrets are stored within a secret directory, which, by default, is the current
 working directory. You can modify this by passing the -s option to `safesh`.
 
 Within the secrets directory is a subdirectory for each public key. Contained
-within the subdirectory for a key are the documents that are encrypted using
-that key. The owner of a private key can read documents within the directory
-that corresponds to his/her public key.
+within the subdirectory for a key are the secrets that are encrypted using that
+key. The owner of a private key can read secrets within the directory that
+corresponds to his/her public key.
 
 The secrets directory, keys directory, and permissions.yml should all be
 version controlled. config.yml is user-specific and should be left out of
@@ -93,7 +99,8 @@ $ safesh update [name]
 
 This will prompt you to enter new plain text for the secret named `[name]`. It
 will then encrypt and release this secret to all those who have permissions to
-access it.
+access it. If you'd like, you may specify additional `[name]`s to update
+multiple secrets at once.
 
 
 ## Read a secret
@@ -104,6 +111,7 @@ $ safesh cat [name]
 ```
 
 This will decrypt the secret named `[name]` and output the plain text to stdout.
+Again, you may specify additional `[name]` arguments to output multiple secrets.
 
 
 ## List secrets
@@ -140,3 +148,23 @@ $ safesh update -r foo
 
 The `-r` option tells the `update` command to only release/revoke `foo`,
 and not change its contents.
+
+To release/revoke all secrets to match the permissions file, simply run:
+
+```sh
+$ safesh update -r all
+```
+
+Note that this will only release/revoke secrets that you have access to.
+
+
+## Delete a secret
+If you'd like to delete a secret entirely, run:
+
+```sh
+$ safesh delete [name]
+```
+
+Make sure to remove the secret from your permissions file afterwards.
+
+You may specify multiple `[name]` arguments to delete multiple secrets.

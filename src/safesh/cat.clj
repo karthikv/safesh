@@ -13,6 +13,7 @@
 
 (defn usage [summary & {message :message}]
   (let [lines ["safesh cat decrypts and outputs a secret to stdout."
+               ""
                "Usage: safesh cat OPTIONS NAME [NAME [NAME [...]]]"
                ""
                "NAME: the name of the secret to output (can specify many)"

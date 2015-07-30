@@ -93,7 +93,7 @@
             (fs/chdir old-cwd)
             (validate-setup-paths! options))
           (do
-            (.println *err* "No config file found; using last valid directory/options.")
+            (.println *err* "No config file found; using last valid options.")
             (let [new-options (-> last-valid-options extract-paths validate-setup-paths!)]
               (fs/chdir old-cwd)
               new-options))))

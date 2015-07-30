@@ -9,6 +9,7 @@
 
 (defn usage [summary & {message :message}]
   (let [lines ["safesh ls lists secrets that can be decrypted."
+               ""
                "Usage: safesh ls OPTIONS"
                ""
                "OPTIONS:"
