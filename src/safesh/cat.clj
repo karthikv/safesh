@@ -48,9 +48,9 @@
         (let [members (-> secret-name keyword secrets)]
           (cond
             (nil? members)
-              (utils/print-exit! 1 (str secret-name " doesn't exist."))
+              (.println *err* (str secret-name " doesn't exist."))
             (not (some #{key-name} members))
-              (utils/print-exit! 1 (str key-name " can't access " secret-name "."))
+              (.println *err* (str key-name " can't access " secret-name "."))
             :else
               (let [secret-path (str secrets-path "/" key-name "/" secret-name)]
                 (when (-> secret-path fs/file? not)

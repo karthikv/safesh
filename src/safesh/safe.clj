@@ -5,7 +5,7 @@
             [safesh.cat :as cat]
             [safesh.update :as update]
             [safesh.fetch :as fetch]
-            [safesh.delete :as delete]
+            [safesh.rm :as rm]
             [safesh.utils :as utils])
   (:gen-class))
 
@@ -163,4 +163,4 @@
 (defn cat! [args options] (run-command! args options cat/execute!))
 (defn update! [args options] (run-command! args options update/execute!))
 (defn fetch! [args options] (run-command! args options fetch/execute!))
-(defn delete! [args options] (run-command! args options delete/execute!))
+(defn rm! [args options] (run-command! args options rm/execute!))

@@ -27,7 +27,7 @@
                "cat - decrypts and outputs a secret to stdout"
                "update - updates and releases a secret to those with permissions"
                "fetch - fetches secrets to local filesystem"
-               "delete - deletes secrets"
+               "rm - deletes secrets"
                ""
                "OPTIONS:"
                summary]]
@@ -53,6 +53,6 @@
           "cat" (safe/cat! command-args options)
           "update" (safe/update! command-args options)
           "fetch" (safe/fetch! command-args options)
-          "delete" (safe/delete! command-args options)
+          "rm" (safe/rm! command-args options)
           (utils/print-exit! 1 "Invalid command"))
         (shutdown-agents)))))

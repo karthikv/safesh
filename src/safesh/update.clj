@@ -73,9 +73,9 @@
         members (-> secret-name keyword secrets)]
     (cond
       (nil? members)
-        (utils/print-exit! 1 (str "Must have " secret-name " in permissions file."))
+        (.println *err* (str "Must have " secret-name " in permissions file."))
       (not (some #{key-name} members))
-        (utils/print-exit! 1 (str "Must give " key-name " permissions to " secret-name "."))
+        (.println *err* (str "Must give " key-name " permissions to " secret-name "."))
       :else
         (let [secret-path (str secrets-path "/" key-name "/" secret-name)]
           (cond

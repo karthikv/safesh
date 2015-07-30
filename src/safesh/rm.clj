@@ -1,4 +1,4 @@
-(ns safesh.delete
+(ns safesh.rm
   (:require [clojure.tools.cli :as cli]
             [clojure.string :as string]
             [me.raynes.fs :as fs]
@@ -10,11 +10,11 @@
   [["-h" "--help" "Print help information."]])
 
 (defn usage [summary & {message :message}]
-  (let [lines ["safesh delete deletes secrets that are no longer needed. After "
+  (let [lines ["safesh rm deletes secrets that are no longer needed. After "
                "deleting a secret, you need to manually remove it from your "
                "permissions file."
                ""
-               "Usage: safesh delete NAME [NAME [NAME [...]]]"
+               "Usage: safesh rm NAME [NAME [NAME [...]]]"
                ""
                "NAME: the name of the secret to delete (can specify many)"
                ""
@@ -28,7 +28,7 @@
         members (-> secret-name keyword secrets)]
     (if (nil? members)
       (do
-          (println (str "Secret " secret-name " doesn't exist."))
+          (.println *err* (str "Secret " secret-name " doesn't exist."))
           false)
 
       (if (some #{key-name} members)
@@ -41,7 +41,7 @@
           true)
 
         (do
-          (println (str "You don't have access to secret " secret-name "."))
+          (.println *err* (str "You don't have access to secret " secret-name "."))
           false)))))
 
 (defn execute! [safe-options args]
