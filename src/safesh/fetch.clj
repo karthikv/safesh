@@ -11,9 +11,9 @@
 
 (defn usage [summary & {message :message}]
   (let [lines ["safesh fetch fetches secrets to the local filesystem. fetch reads "
-               "in a YAML file with key-value pairs. The keys correspond to document "
+               "in a YAML file with key-value pairs. The keys correspond to secret "
                "names in safesh, and the values correspond to paths on the local "
-               "filesystem. safesh fetches the documents by name and puts them at "
+               "filesystem. safesh fetches the secrets by name and puts them at "
                "their corresponding paths."
                "Usage: safesh fetch [PATH]"
                ""

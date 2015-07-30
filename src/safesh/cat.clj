@@ -13,9 +13,9 @@
 
 (defn usage [summary & {message :message}]
   (let [lines ["safesh cat decrypts and outputs a secret to stdout."
-               "Usage: safesh cat OPTIONS NAME"
+               "Usage: safesh cat OPTIONS NAME [NAME [NAME [...]]]"
                ""
-               "NAME: the name of the secret to output"
+               "NAME: the name of the secret to output (can specify many)"
                ""
                "OPTIONS:"
                summary]]
@@ -36,24 +36,24 @@
        (cli/parse-opts args CLI-OPTIONS)]
     (cond
       (:help options) (utils/print-exit! 0 (usage summary))
-      (not= (count arguments) 1)
+      (= (count arguments) 0)
         (utils/print-exit! 1 (usage summary :message
-                                    "Need exactly one argument: secret name."))
+                                    "Must specify at least one secret."))
       errors (utils/print-exit! 1 (usage summary :message
                                          (str (string/join "\n" errors)))))
 
-    (let [{:keys [private-key-path key-name secrets secrets-path]} safe-options
-          secret-name (first arguments)
-          members (-> secret-name keyword secrets)]
-      (cond
-        (nil? members)
-          (utils/print-exit! 1 (str secret-name " doesn't exist."))
-        (not (some #{key-name} members))
-          (utils/print-exit! 1 (str key-name " can't access " secret-name "."))
-        :else
-          (let [secret-path (str secrets-path "/" key-name "/" secret-name)]
-            (when (-> secret-path fs/file? not)
-              (utils/print-exit! 1 "Secret doesn't exist on filesystem."))
-            (let [secret (read-secret secret-path private-key-path)]
-              (print secret)
-              (flush)))))))
+    (let [{:keys [private-key-path key-name secrets secrets-path]} safe-options]
+      (doseq [secret-name arguments]
+        (let [members (-> secret-name keyword secrets)]
+          (cond
+            (nil? members)
+              (utils/print-exit! 1 (str secret-name " doesn't exist."))
+            (not (some #{key-name} members))
+              (utils/print-exit! 1 (str key-name " can't access " secret-name "."))
+            :else
+              (let [secret-path (str secrets-path "/" key-name "/" secret-name)]
+                (when (-> secret-path fs/file? not)
+                  (utils/print-exit! 1 "Secret doesn't exist on filesystem."))
+                (let [secret (read-secret secret-path private-key-path)]
+                  (print secret)
+                  (flush)))))))))
