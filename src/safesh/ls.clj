@@ -21,8 +21,8 @@
        (cli/parse-opts args CLI-OPTIONS)]
     (cond
       (:help options) (utils/print-exit! 0 (usage summary))
-      (not= (count arguments) 0) (utils/print-exit! 1 (usage summary :message
-                                                             "Takes no arguments."))
+      (not= (count arguments) 0)
+        (utils/print-exit! 1 (usage summary :message "Must have no arguments."))
       errors (utils/print-exit! 1 (usage summary :message
                                          (str (string/join "\n" errors)))))
 

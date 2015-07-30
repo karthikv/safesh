@@ -8,6 +8,7 @@
             [safesh.aes :as aes]
             [safesh.utils :as utils]
             [safesh.cat :as cat])
+  (:import java.io.File)
   (:gen-class))
 
 (def CLI-OPTIONS
@@ -104,7 +105,7 @@
       (:help options) (utils/print-exit! 0 (usage summary))
       (= (count arguments) 0)
         (utils/print-exit! 1 (usage summary :message
-                                    "Must specify at least one secret"))
+                                    "Must specify at least one secret."))
       errors (utils/print-exit! 1 (usage summary :message
                                          (str (string/join "\n" errors)))))
 

@@ -23,10 +23,11 @@
                "Usage: safesh OPTIONS COMMAND"
                ""
                "COMMANDS:"
-               (str "ls - lists secrets that can be decrypted")
-               (str "cat - decrypts and outputs a secret to stdout")
-               (str "update - updates and releases a secret to those with permissions") 
-               (str "fetch - fetches secrets to local filesystem")
+               "ls - lists secrets that can be decrypted"
+               "cat - decrypts and outputs a secret to stdout"
+               "update - updates and releases a secret to those with permissions"
+               "fetch - fetches secrets to local filesystem"
+               "delete - deletes secrets"
                ""
                "OPTIONS:"
                summary]]
@@ -52,5 +53,6 @@
           "cat" (safe/cat! command-args options)
           "update" (safe/update! command-args options)
           "fetch" (safe/fetch! command-args options)
+          "delete" (safe/delete! command-args options)
           (utils/print-exit! 1 "Invalid command"))
         (shutdown-agents)))))
