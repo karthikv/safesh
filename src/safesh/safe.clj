@@ -52,7 +52,7 @@
       (utils/print-exit! 1 "\nMust provide a private key path."))
     (utils/print-exit! 1 "\nMust provide a key name.")))
 
-(defn record-last-valid-options [options]
+(defn record-last-valid-options! [options]
   (->>
     (yaml/generate-string (merge {:directory (str fs/*cwd*)} options))
     (spit GLOBAL-CONFIG-PATH)))
@@ -77,7 +77,7 @@
     (if error (utils/print-exit! 1 error))
     (when (-> config-path fs/file? not)
       (create-config! (fs/file keys-path) config-path))
-    (record-last-valid-options options)
+    (record-last-valid-options! options)
     options))
 
 (defn set-up! [options]
