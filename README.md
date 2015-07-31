@@ -162,7 +162,7 @@ Note that this will only release/revoke secrets that you have access to.
 If you'd like to delete a secret entirely, run:
 
 ```sh
-$ safesh delete [name]
+$ safesh rm [name]
 ```
 
 Make sure to remove the secret from your permissions file afterwards.
