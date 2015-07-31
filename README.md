@@ -168,3 +168,20 @@ $ safesh delete [name]
 Make sure to remove the secret from your permissions file afterwards.
 
 You may specify multiple `[name]` arguments to delete multiple secrets.
+
+
+## Fetch secrets to local filesystem
+Given a YAML file mapping secret names to filesystem paths:
+
+```yml
+secret1: some/path/secret1
+secret2: some/other/path/secret2
+```
+
+You can fetch each secret to its corresponding filesystem location by running:
+
+```sh
+$ safesh fetch [path]
+```
+
+where `[path]` is the path to the YAML file. `[path]` defaults to ./safesh.yml.
