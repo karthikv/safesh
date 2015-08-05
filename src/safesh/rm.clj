@@ -62,4 +62,5 @@
         (->>
           deleted-secrets
           (string/join ", ")
-          (printf "Please remove %s from your permissions file.\n"))))))
+          (printf "Please remove %s from your permissions file.\n"))
+        (flush)))))
