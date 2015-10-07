@@ -15,7 +15,8 @@
                "in a YAML file with key-value pairs. The keys correspond to secret "
                "names in safesh, and the values correspond to paths on the local "
                "filesystem. safesh fetches the secrets by name and puts them at "
-               "their corresponding paths."
+               "their corresponding paths. A value may be an array of paths if a "
+               "single secret needs to be fetched to multiple locations."
                ""
                "Usage: safesh fetch [PATH]"
                ""
@@ -44,12 +45,13 @@
       (let [{:keys [secrets secrets-path key-name private-key-path]} safe-options
             dir-path (str secrets-path "/" key-name "/")
             secret-keyword-paths (-> path slurp yaml/parse-string)]
-        (doseq [[secret-keyword path] secret-keyword-paths]
-          (let [secret-name (name secret-keyword)]
+        (doseq [[secret-keyword target-paths] secret-keyword-paths]
+          (let [secret-name (name secret-keyword)
+                target-paths (if (seq? target-paths) target-paths (vector target-paths))]
             (if (-> secrets secret-keyword not)
               (.println *err* (str "Secret " secret-name " doesn't exist."))
-              (do
-                (->>
-                  (cat/read-secret (str dir-path secret-name) private-key-path)
-                  (spit (utils/expand-path path)))
-                (println (str "Reading " secret-name " into " path))))))))))
+              (let [secret-data (cat/read-secret (str dir-path secret-name)
+                                                 private-key-path)]
+                (doseq [target-path target-paths]
+                  (spit (utils/expand-path target-path) secret-data)
+                  (println (str "Reading " secret-name " into " target-path)))))))))))
