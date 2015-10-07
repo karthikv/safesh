@@ -1,4 +1,4 @@
-(defproject safesh "0.2.0"
+(defproject safesh "0.3.0"
   :description "Store and manage encrypted secrets using SSH keys."
   :url "https://github.com/karthikv/safesh"
   :license {:name "MIT"
